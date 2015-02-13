@@ -8,7 +8,7 @@
 ;; Brian Zwahr <echosa@gmail.com>
 ;; Dave Benjamin <dave@ramenlabs.com>
 
-;; Authors: 
+;; Authors:
 ;; Bao Haojun <baohaojun@gmail.com>
 ;; Alex Harsanyi <AlexHarsanyi@gmail.com>
 
@@ -48,7 +48,7 @@
   "Jiralib customization group."
   :group 'applications)
 
-(defgroup jiralib-faces nil 
+(defgroup jiralib-faces nil
   "Faces for displaying Jiralib information."
   :group 'jiralib)
 
@@ -142,7 +142,7 @@ This is maintained by `jiralib-login'.")
   "Login into JIRA and store the authentication token in `jiralib-token'"
   ;; NOTE that we cannot rely on `jiralib-call' because `jiralib-call' relies on
   ;; us ;-)
-  (interactive 
+  (interactive
    (if (> 24 emacs-major-version)
        (let ((user (read-string "Username for Jira server login? "))
 	     (password (read-passwd "Password for Jira server login? ")))
@@ -163,40 +163,40 @@ This is maintained by `jiralib-login'.")
 		     (funcall sec)
 		   sec)))
 	 (list user secret)))))
-  (unless jiralib-wsdl 
+  (unless jiralib-wsdl
     (jiralib-load-wsdl))
-  (setq jiralib-token 
-        (car (soap-invoke jiralib-wsdl "jirasoapservice-v2" "login" username password)))
+  (setq jiralib-token
+	(car (soap-invoke jiralib-wsdl "jirasoapservice-v2" "login" username password)))
   (setq jiralib-user-login-name username)
 
   ;; At this poing, soap-invoke didn't raise an error, so the login
   ;; credentials are OK.  use them to log into the web interface as
   ;; well, as this will be used to link issues (an operation which is
-  ;; not exposed to the SOAP interface.  
+  ;; not exposed to the SOAP interface.
   ;;
   ;; Note that we don't validate the response at all -- not sure how we
   ;; would do it...
-  
+
   (let ((url (concat jiralib-url "/secure/Dashboard.jspa?"
-                     (format "&os_username=%s&os_password=%s&os_cookie=true" 
-                             username password))))
+		     (format "&os_username=%s&os_password=%s&os_cookie=true"
+			     username password))))
     (let ((url-request-method "POST")
-          (url-package-name "Emacs jiralib.el")
-          (url-package-version "1.0")
-          (url-mime-charset-string "utf-8;q=1, iso-8859-1;q=0.5")
-          (url-request-data "abc")
-          (url-request-coding-system 'utf-8)
-          (url-http-attempt-keepalives t))
+	  (url-package-name "Emacs jiralib.el")
+	  (url-package-version "1.0")
+	  (url-mime-charset-string "utf-8;q=1, iso-8859-1;q=0.5")
+	  (url-request-data "abc")
+	  (url-request-coding-system 'utf-8)
+	  (url-http-attempt-keepalives t))
       (let ((buffer (url-retrieve-synchronously url)))
-        ;; This is just a basic check that the page was retrieved
-        ;; correctly.  No error does not indicate a succesfull login,
-        ;; we would have to parse the HTML page to find that out...
-        (with-current-buffer buffer
-          (declare (special url-http-response-status))
-          (if (> url-http-response-status 299)
-              (error "Error logging into JIRA Web interface %s" 
-                     url-http-response-status)))
-        (kill-buffer buffer)))))
+	;; This is just a basic check that the page was retrieved
+	;; correctly.  No error does not indicate a succesfull login,
+	;; we would have to parse the HTML page to find that out...
+	(with-current-buffer buffer
+	  (declare (special url-http-response-status))
+	  (if (> url-http-response-status 299)
+	      (error "Error logging into JIRA Web interface %s"
+		     url-http-response-status)))
+	(kill-buffer buffer)))))
 
 (defun jiralib-call (method &rest params)
   (car (apply 'jiralib-call-it method params)))
@@ -220,18 +220,19 @@ when invoking it through `jiralib-call', the call shoulbe be:
   (unless jiralib-token
     (call-interactively 'jiralib-login))
   (condition-case data
-      (apply 'soap-invoke jiralib-wsdl "jirasoapservice-v2" 
-             method jiralib-token params)
+      (apply 'soap-invoke jiralib-wsdl "jirasoapservice-v2"
+	     method jiralib-token params)
     (soap-error
      ;; If we are here, we had a token, but it expired.  Re-login and try
      ;; again.
      (setq jiralib-token nil)
      (call-interactively 'jiralib-login)
-     (apply 'soap-invoke jiralib-wsdl "jirasoapservice-v2" 
-            method jiralib-token params))))
+     (apply 'soap-invoke jiralib-wsdl "jirasoapservice-v2"
+	    method jiralib-token params))))
 
 
 ;;;; Some utility functions
+
 (defun jiralib-make-list (data field)
   (loop for element in data
 	collect (cdr (assoc field element))))
@@ -248,7 +249,7 @@ VALUE-FIELD is the field to use as the value in the returned alist"
 (defun jiralib-make-remote-field-values (fields)
   "Transform a (KEY . VALUE) list into a RemoteFieldValue structure.
 
-Each (KEY . VALUE) pair is transformed into 
+Each (KEY . VALUE) pair is transformed into
  ((id . KEY) (values . (VALUE)))
 
 This method exists because Several JIRA methods require a
@@ -261,18 +262,18 @@ emacs-lisp"
     ;; updateIssue wants
     (dolist (field fields)
       (let ((name (car field))
-            (value (cdr field)))
-        (when (symbolp name)
-          (setq name (symbol-name name)))
-        ;; Value must be an "array" (for which soap-client accepts lists) even
-        ;; if it is just one value
-        (unless (vectorp value)
-          (setq value (vector value)))
-        (push `((id . ,name) (values . ,value)) 
-              remote-field-values)))
-    
-    (apply 'vector (nreverse remote-field-values))))
+	    (value (cdr field)))
+	(when (symbolp name)
+	  (setq name (symbol-name name)))
+	;; Value must be an "array" (for which soap-client accepts lists) even
+	;; if it is just one value
+	(unless (vectorp value)
+	  (setq value (vector value)))
+	(push `((id . ,name) (values . ,value))
+	      remote-field-values)))
 
+    (apply 'vector (nreverse remote-field-values))))
+
 ;;;; Wrappers around JIRA methods
 
 (defun jiralib-update-issue (key fields)
@@ -347,7 +348,7 @@ database.  An issue is assumed to be in the format KEY-NUMBER,
 where KEY is a project key and NUMBER is the issue number."
   (unless jiralib-issue-regexp
     (let ((projects (mapcar (lambda (e) (downcase (cdr (assoc 'key e))))
-                            (jiralib-call "getProjectsNoSchemes"))))
+			    (jiralib-call "getProjectsNoSchemes"))))
       (setq jiralib-issue-regexp (concat "\\<" (regexp-opt projects) "-[0-9]+\\>"))))
   jiralib-issue-regexp)
 
@@ -356,7 +357,7 @@ where KEY is a project key and NUMBER is the issue number."
 LIMIT is the maximum number of queries to return.  Note that JIRA
 has an internal limit of how many queries to return, as such, it
 might not be possible to find *ALL* the issues that match a
-query." 
+query."
   (unless (or limit (numberp limit))
     (setq limit 100))
   (jiralib-call "getIssuesFromJqlSearch" jql limit))
@@ -364,7 +365,7 @@ query."
 (defun jiralib-get-available-actions (issue-key)
   "Return the available workflow actions for ISSUE-KEY.
 This runs the getAvailableActions SOAP method."
-  (jiralib-make-assoc-list 
+  (jiralib-make-assoc-list
    (jiralib-call "getAvailableActions" issue-key)
    'id 'name))
 
@@ -383,22 +384,22 @@ The time worked begins at START-DATE and has a TIME-SPENT
 duration. JIRA will automatically update the remaining estimate
 by subtracting TIME-SPENT from it.
 
-START-DATE should be in the format 2010-02-05T14:30:00Z 
+START-DATE should be in the format 2010-02-05T14:30:00Z
 
 TIME-SPENT can be in one of the following formats: 10m, 120m
 hours; 10h, 120h days; 10d, 120d weeks."
   (jiralib-call "addWorklogAndAutoAdjustRemainingEstimate"
-                   issue-key
-                   `((startDate . ,start-date)
-                     (timeSpent . ,time-spent)
-                     (comment   . ,comment))))
+		   issue-key
+		   `((startDate . ,start-date)
+		     (timeSpent . ,time-spent)
+		     (comment   . ,comment))))
 
 (defun jiralib-link-issue (issue-key link-type other-issue-key)
   "Create a link between ISSUE-KEY and OTHER-ISSUE-KEY.
 LINK-TYPE is a string representing the type of the link, e.g
 \"requires\", \"depends on\", etc.  I believe each JIRA
 installation can define its own link types."
-  
+
   ;; IMPLEMENTATION NOTES: The linking jira issues functionality is
   ;; not exposed through the SOAP api, we must use the web interface
   ;; to do the linking.  Unfortunately, we cannot parse the result, so
@@ -407,37 +408,36 @@ installation can define its own link types."
   ;; ISSUE-KEY and OTHER-ISSUE-KEY.  This will ensure that we are
   ;; logged in (see also jiralib-login) and that both issues exist. We
   ;; don't validate the LINK-TYPE, not sure how to do it.
-  ;;
 
   (let ((issue (jiralib-get-issue issue-key))
-        (other-issue (jiralib-get-issue other-issue-key)))
-    (let ((url (concat jiralib-url 
-                       "/secure/LinkExistingIssue.jspa?"
-                       (format "linkDesc=%s&linkKey=%s&id=%s&Link=Link" 
-                               link-type other-issue-key (cdr (assq 'id issue))))))
+	(other-issue (jiralib-get-issue other-issue-key)))
+    (let ((url (concat jiralib-url
+		       "/secure/LinkExistingIssue.jspa?"
+		       (format "linkDesc=%s&linkKey=%s&id=%s&Link=Link"
+			       link-type other-issue-key (cdr (assq 'id issue))))))
       (let ((url-request-method "POST")
-            (url-package-name "Emacs scratch.el")
-            (url-package-version "1.0")
-            (url-mime-charset-string "utf-8;q=1, iso-8859-1;q=0.5")
-            (url-request-data "abc")
-            (url-request-coding-system 'utf-8)
-            (url-http-attempt-keepalives t)
-            ;; see http://confluence.atlassian.com/display/JIRA/Form+Token+Handling
-            (url-request-extra-headers '(("X-Atlassian-Token" . "no-check"))))
+	    (url-package-name "Emacs scratch.el")
+	    (url-package-version "1.0")
+	    (url-mime-charset-string "utf-8;q=1, iso-8859-1;q=0.5")
+	    (url-request-data "abc")
+	    (url-request-coding-system 'utf-8)
+	    (url-http-attempt-keepalives t)
+	    ;; see http://confluence.atlassian.com/display/JIRA/Form+Token+Handling
+	    (url-request-extra-headers '(("X-Atlassian-Token" . "no-check"))))
 
        (let ((buffer (url-retrieve-synchronously url)))
-        ;; This is just a basic check that the page was retrieved
-         ;; correctly.  No error does not indicate a success as we
-         ;; have to parse the HTML page to find that out...
-         (with-current-buffer buffer
-           (declare (special url-http-response-status))
-           (if (> url-http-response-status 299)
-               (error "Error linking issue through JIRA Web interface %s" 
-                      url-http-response-status)))
-           (kill-buffer buffer))))))
+	 ;; This is just a basic check that the page was retrieved
+	 ;; correctly.  No error does not indicate a success as we
+	 ;; have to parse the HTML page to find that out...
+	 (with-current-buffer buffer
+	   (declare (special url-http-response-status))
+	   (if (> url-http-response-status 299)
+	       (error "Error linking issue through JIRA Web interface %s"
+		      url-http-response-status)))
+	   (kill-buffer buffer))))))
 
 
-;................................................ issue field accessors ....
+;;;; Issue field accessors
 
 (defun jiralib-issue-key (issue)
   "Return the key of ISSUE."
@@ -458,9 +458,7 @@ Return nil if the field is not found"
   (catch 'found
     (dolist (field (cdr (assq 'customFieldValues issue)))
       (when (equal (cdr (assq 'customfieldId field)) custom-field)
-        (throw 'found (cadr (assq 'values field)))))))
-  
-
+	(throw 'found (cadr (assq 'values field)))))))
 
 (defvar jiralib-current-issue nil
   "This holds the currently selected issue.")
@@ -479,18 +477,18 @@ Return nil if the field is not found"
 
 (defun jiralib-get-project-name (key)
   (let ((projects jiralib-projects-list)
-        (name nil))
+	(name nil))
     (dolist (project projects)
       (if (equal (cdr (assoc 'key project)) key)
-          (setf name (cdr (assoc 'name project)))))
+	  (setf name (cdr (assoc 'name project)))))
     name))
 
 (defun jiralib-get-type-name (id)
   (let ((types jiralib-types)
-        (name nil))
+	(name nil))
     (dolist (type types)
       (if (equal (cdr (assoc 'id type)) id)
-          (setf name (cdr (assoc 'name type)))))
+	  (setf name (cdr (assoc 'name type)))))
     name))
 
 (defun jiralib-get-user-fullname (username)
@@ -498,23 +496,22 @@ Return nil if the field is not found"
       (cdr (assoc username jiralib-user-fullnames))
     (progn
       (let ((user (jiralib-get-user username)))
-        (setf jiralib-user-fullnames (append jiralib-user-fullnames (list (cons username (cdr (assoc 'fullname user))))))
-        (cdr (assoc 'fullname user))))))
-
+	(setf jiralib-user-fullnames (append jiralib-user-fullnames (list (cons username (cdr (assoc 'fullname user))))))
+	(cdr (assoc 'fullname user))))))
 
 
 (defun jiralib-get-filter (filter-id)
   "Returns a filter given its filter ID."
   (flet ((id-match (filter)
-                   (equal filter-id (cdr (assoc 'id filter)))))
+		   (equal filter-id (cdr (assoc 'id filter)))))
     (find-if 'id-match (jiralib-get-saved-filters))))
 
 (defun jiralib-get-filter-alist ()
   "Returns an association list mapping filter names to IDs"
   (mapcar (lambda (filter)
-            (cons (cdr (assoc 'name filter))
-                  (cdr (assoc 'id filter))))
-          (jiralib-get-saved-filters)))
+	    (cons (cdr (assoc 'name filter))
+		  (cdr (assoc 'id filter))))
+	  (jiralib-get-saved-filters)))
 
 (defun jiralib-add-comment (issue-key comment)
   "Adds a comment to an issue"
@@ -571,7 +568,7 @@ will cache it."
   (project-keys search-terms max-num-results)
   "Find issues using a free text search, limited to certain projects"
   (jiralib-call "getIssuesFromTextSearchWithProject"
-             (apply 'vector project-keys) search-terms max-num-results))
+	     (apply 'vector project-keys) search-terms max-num-results))
 
 ;; Modified by Brian Zwahr to use getProjectsNoSchemes instead of getProjects
 (defun jiralib-get-projects ()
