@@ -1,0 +1,6 @@
+#+TITLE: Still to do in this project
+
+* Change the signatures of functions.
+Especially in [[file:jiralib.el::(defun%20jiralib-link-issue%20(issue-key%20link-type%20other-issue-key)][jiralib-link-issue]], as the link-type could partially be
+applied to get a more specific function. This will also help with the
+doc string ;)
