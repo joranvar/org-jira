@@ -52,4 +52,18 @@ Example:
   "Get specific project on JIRA by ID."
   (rest-json-sync-call "https://example.com/jira/rest" (format "/api/2/project/%s" id)))
 
+(defun jira-component-get-by-id (id)
+  "Get specific component by ID."
+  (rest-json-sync-call "https://example.com/jira/rest" (format "/api/2/component/%s" id)))
+
+(defun jira-issue-get-by-id (id)
+  "Get specific issue by ID."
+  (rest-json-sync-call "https://example.com/jira/rest" (format "/api/2/issue/%s" id)))
+
+(defun jira-issue-search (jql)
+  "Execute a JQL search and return the found issues."
+  (rest-json-sync-call "https://example.com/jira/rest" "/api/2/search" "POST"
+		       (list :jql jql
+			     :startAt 0
+			     :maxResults 50)))
 ;;; jiralib-rest.el ends here
