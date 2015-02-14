@@ -32,4 +32,24 @@ Example:
     (cons (request-response-status-code request)
 	  (request-response-data request))))
 
+
+;; JIRA methods
+(defun jira-session-create (username password)
+  "Create a session for user USERNAME, identified by PASSWORD."
+  (rest-json-sync-call "https://example.com/jira/rest" "/auth/1/session" "POST"
+	     (list :username username
+		   :password password)))
+
+(defun jira-session-delete ()
+  "Destroy the current session, aka logout."
+  (rest-json-sync-call "https://example.com/jira/rest" "/auth/1/session" "DELETE"))
+
+(defun jira-project-get ()
+  "Get all visible projects on JIRA."
+  (rest-json-sync-call "https://example.com/jira/rest" "/api/2/project"))
+
+(defun jira-project-get-by-id (id)
+  "Get specific project on JIRA by ID."
+  (rest-json-sync-call "https://example.com/jira/rest" (format "/api/2/project/%s" id)))
+
 ;;; jiralib-rest.el ends here
