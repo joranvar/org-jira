@@ -66,4 +66,6 @@ Example:
 		       (list :jql jql
 			     :startAt 0
 			     :maxResults 50)))
+
+(provide 'jiralib-rest)
 ;;; jiralib-rest.el ends here
