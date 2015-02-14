@@ -1,6 +1,24 @@
 #+TITLE: Still to do in this project
 
-* Change the signatures of functions.
+* Change the signatures of functions
 Especially in [[file:jiralib.el::(defun%20jiralib-link-issue%20(issue-key%20link-type%20other-issue-key)][jiralib-link-issue]], as the link-type could partially be
 applied to get a more specific function. This will also help with the
 doc string ;)
+
+This (the better doc string) will also be the case in
+[[file:org-jira.el::(defun%20org-jira-get-from-org%20(type%20entry)][org-jira-get-from-org]].
+
+* Allow fetching of issue trees
+This is more org-mode like. Perhaps the link between children and
+parents should be stored in the a "Parent_link_type" property in each
+child, so as not to be confused when updating or fetching again. This
+probably would also be more convenient if there were more "get
+children of specific type" interactive functions, such as "get
+children from epic", or, indeed, "get epics from project".
+
+* Refactor these functions, they're too large
+[[file:org-jira.el::(defun%20org-jira-get-issues%20(issues)][file:org-jira.el::(defun org-jira-get-issues (issues)]]
+[[file:org-jira.el::(defun%20org-jira-update-comments-for-current-issue%20()][file:org-jira.el::(defun org-jira-update-comments-for-current-issue ()]]
+
+* Reread some functions for understanding
+E.g. [[file:org-jira.el::(defun%20org-jira-get-comment-body%20(&optional%20comment-id)][org-jira-get-comment-body]]
