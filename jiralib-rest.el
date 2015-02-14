@@ -10,10 +10,10 @@
   "Call the REST method on BASE-URL/RESOURCE.
 
 The http method METHOD is used, defaulting to GET.
-If given, the plist DATA is encoded to json and sent along.
+If given, the alist DATA is encoded to json and sent along.
 
 Returns a cons of the response status code and the response data,
-also encoded as a plist.
+also encoded as a alist.
 
 Example:
 
@@ -27,7 +27,7 @@ Example:
 		  :type (or method "GET")
 		  :data (and data (json-encode data))
 		  :headers (and data '(("Content-Type" . "application/json")))
-		  :parser (lambda () (let ((json-object-type 'plist)) (json-read)))
+		  :parser (lambda () (let ((json-object-type 'alist)) (json-read)))
 		  :sync t)))
     (cons (request-response-status-code request)
 	  (request-response-data request))))
