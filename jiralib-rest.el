@@ -32,37 +32,39 @@ Example:
     (cons (request-response-status-code request)
 	  (request-response-data request))))
 
+(defvar jira-rest-url "https://example.com/jira/rest"
+  "The base url of the JIRA REST interface.")
 
 ;; JIRA methods
 (defun jira-session-create (username password)
   "Create a session for user USERNAME, identified by PASSWORD."
-  (rest-json-sync-call "https://example.com/jira/rest" "/auth/1/session" "POST"
+  (rest-json-sync-call jira-rest-url "/auth/1/session" "POST"
 		       (list :username username
 			     :password password)))
 
 (defun jira-session-delete ()
   "Destroy the current session, aka logout."
-  (rest-json-sync-call "https://example.com/jira/rest" "/auth/1/session" "DELETE"))
+  (rest-json-sync-call jira-rest-url "/auth/1/session" "DELETE"))
 
 (defun jira-project-get ()
   "Get all visible projects on JIRA."
-  (rest-json-sync-call "https://example.com/jira/rest" "/api/2/project"))
+  (rest-json-sync-call jira-rest-url "/api/2/project"))
 
 (defun jira-project-get-by-id (id)
   "Get specific project by ID."
-  (rest-json-sync-call "https://example.com/jira/rest" (format "/api/2/project/%s" id)))
+  (rest-json-sync-call jira-rest-url (format "/api/2/project/%s" id)))
 
 (defun jira-component-get-by-id (id)
   "Get specific component by ID."
-  (rest-json-sync-call "https://example.com/jira/rest" (format "/api/2/component/%s" id)))
+  (rest-json-sync-call jira-rest-url (format "/api/2/component/%s" id)))
 
 (defun jira-issue-get-by-id (id)
   "Get specific issue by ID."
-  (rest-json-sync-call "https://example.com/jira/rest" (format "/api/2/issue/%s" id)))
+  (rest-json-sync-call jira-rest-url (format "/api/2/issue/%s" id)))
 
 (defun jira-issue-search (jql)
   "Execute a JQL search and return the found issues."
-  (rest-json-sync-call "https://example.com/jira/rest" "/api/2/search" "POST"
+  (rest-json-sync-call jira-rest-url "/api/2/search" "POST"
 		       (list :jql jql
 			     :startAt 0
 			     :maxResults 50)))
