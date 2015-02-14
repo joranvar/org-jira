@@ -7,7 +7,7 @@
 (require 'dash)
 
 ;;; Code:
-(defun rest-json-sync-call (base-url resource &optional method data)
+(defun rest-json-sync-call (base-url resource &optional method &rest data)
   "Call the REST method on BASE-URL/RESOURCE.
 
 The http method METHOD is used, defaulting to GET.
@@ -46,8 +46,8 @@ Example:
 (defun jira-session-create (username password)
   "Create a session for user USERNAME, identified by PASSWORD."
   (jira-call "/auth/1/session" "POST"
-	     (list :username username
-		   :password password)))
+	     :username username
+	     :password password))
 
 (defun jira-session-delete ()
   "Destroy the current session, aka logout."
@@ -72,9 +72,9 @@ Example:
 (defun jira-issue-search (jql)
   "Execute a JQL search and return the found issues."
   (jira-call "/api/2/search" "POST"
-	     (list :jql jql
-		   :startAt 0
-		   :maxResults 50)))
+	     :jql jql
+	     :startAt 0
+	     :maxResults 50))
 
 (provide 'jiralib-rest)
 ;;; jiralib-rest.el ends here
