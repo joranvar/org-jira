@@ -37,8 +37,8 @@ Example:
 (defun jira-session-create (username password)
   "Create a session for user USERNAME, identified by PASSWORD."
   (rest-json-sync-call "https://example.com/jira/rest" "/auth/1/session" "POST"
-	     (list :username username
-		   :password password)))
+		       (list :username username
+			     :password password)))
 
 (defun jira-session-delete ()
   "Destroy the current session, aka logout."
