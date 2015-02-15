@@ -1,4 +1,3 @@
-
 (require 'f)
 (require 'jiralib-rest (f-expand "jiralib-rest.el" (f-parent (f-dirname (f-this-file)))))
 
@@ -13,4 +12,5 @@
       (fset ,fsymbol old-call)
       result)))
 
+(provide 'test-helper)
 ;;; test-helper.el ends here

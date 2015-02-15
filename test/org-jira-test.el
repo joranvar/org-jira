@@ -1,4 +1,5 @@
-
+(require 'f)
+(require 'test-helper (f-expand "test-helper.el" (f-dirname (f-this-file))))
 
 ;;; Code:
 (ert-deftest using-fake-environment-works-fine ()
