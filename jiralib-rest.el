@@ -96,26 +96,29 @@ needed.\n")
   (org-entry-put (point) "ORG-JIRA-REST-URL" "http://example.com/jira/rest")
   (insert org-jira-default-root-text))
 
-(defmacro org-jira-ensure-in-jira-node (point &rest body)
-  "Ensure POINT is in an org node with ORG-JIRA-NODE set, before executing BODY.
+(defun org-jira--get-all-nodes ()
+  "Get all the org-jira entries in the current buffer."
+  (unless (eq major-mode 'org-mode) (org-mode))
+  (org-map-entries
+   (lambda () (cons (point) (org-entry-get (point) "ORG-JIRA-NODE")))))
 
-Sets org-jira-rest-url accordingly."
-  (declare (indent defun))
-  `(save-excursion
-    (goto-char ,point)
-    (while (and (not (equal (org-entry-get (point) "ORG-JIRA-NODE") "root"))
-		(condition-case nil (outline-up-heading 1) (error nil))))
-    (let ((org-jira-rest-url (org-entry-get (point) "ORG-JIRA-REST-URL")))
-      (unless org-jira-rest-url
-	(error "No root node found, please call org-jira-create-org-tree first"))
-      ,@body)))
+(defun org-jira-ensure-in-jira-node (entries)
+  "Ensure POINT is in an org node.
+
+ENTRIES is the list of nodes according to `org-jira--get-all-nodes'.
+
+Returns org-jira-rest-url accordingly."
+  (let ((root-node-point (car (--first (equal (cdr it) "root") entries))))
+    (unless root-node-point
+      (error "No root node found, please call org-jira-create-org-tree first"))
+    (goto-char root-node-point)
+    (org-entry-get (point) "ORG-JIRA-REST-URL")))
 
 (defun org-jira-fetch-projects ()
   "Fetch all projects on the JIRA server for the root node in this buffer."
   (interactive)
-  (unless (eq major-mode 'org-mode) (org-mode))
-  (org-jira-ensure-in-jira-node (point)
-    (jira-set-rest-url org-jira-rest-url)
+  (let ((entries (org-jira--get-all-nodes)))
+    (jira-set-rest-url (org-jira-ensure-in-jira-node entries))
     (--each (append (cdr (jira-project-get)) nil)
       (save-excursion
 	(forward-line)
