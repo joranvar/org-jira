@@ -4,24 +4,25 @@
 
 (require 'request)
 (require 'json)
+(require 'dash)
 
 ;;; Code:
-(defun rest-json-sync-call (base-url resource &optional method data)
+(defun rest-json-sync-call (base-url resource &optional method &rest data)
   "Call the REST method on BASE-URL/RESOURCE.
 
-The http method METHOD is used, defaulting to GET.
-If given, the alist DATA is encoded to json and sent along.
+The http method METHOD is used, defaulting to GET.  If present,
+the extra DATA (as a plist) is encoded to json and sent along.
 
 Returns a cons of the response status code and the response data,
-also encoded as a alist.
+encoded as a alist.
 
 Example:
 
   (rest-json-sync-call \"http://rest.example.com\" \"/thing\"
                        \"POST\"
-                       '(:name \"myThing\" :color \"blue\"))
+                       :name \"myThing\" :color \"blue\")
 
-  ⇒ (200 :thing (:id 1 :name \"myThing\" :color \"blue\"))"
+  ⇒ (200 . (thing (id . 1) (name . \"myThing\") (color . \"blue\")))"
   (let ((request (request
 		  (concat base-url resource)
 		  :type (or method "GET")
@@ -32,42 +33,48 @@ Example:
     (cons (request-response-status-code request)
 	  (request-response-data request))))
 
-(defvar jira-rest-url "https://example.com/jira/rest"
-  "The base url of the JIRA REST interface.")
+;; Partial function pointer
+(declare-function
+ jira-call t
+ "The function to call to get a REST result from JIRA.")
+
+(defun jira-set-rest-url (url)
+  "Set the base url of the JIRA REST interface to URL."
+  (fset #'jira-call (-partial #'rest-json-sync-call url)))
 
 ;; JIRA methods
 (defun jira-session-create (username password)
   "Create a session for user USERNAME, identified by PASSWORD."
-  (rest-json-sync-call jira-rest-url "/auth/1/session" "POST"
-		       (list :username username
-			     :password password)))
+  (jira-call "/auth/1/session" "POST"
+	     :username username
+	     :password password))
 
 (defun jira-session-delete ()
   "Destroy the current session, aka logout."
-  (rest-json-sync-call jira-rest-url "/auth/1/session" "DELETE"))
+  (jira-call "/auth/1/session" "DELETE"))
 
 (defun jira-project-get ()
   "Get all visible projects on JIRA."
-  (rest-json-sync-call jira-rest-url "/api/2/project"))
+  (jira-call "/api/2/project"))
 
 (defun jira-project-get-by-id (id)
   "Get specific project by ID."
-  (rest-json-sync-call jira-rest-url (format "/api/2/project/%s" id)))
+  (jira-call (format "/api/2/project/%s" id)))
 
 (defun jira-component-get-by-id (id)
   "Get specific component by ID."
-  (rest-json-sync-call jira-rest-url (format "/api/2/component/%s" id)))
+  (jira-call (format "/api/2/component/%s" id)))
 
 (defun jira-issue-get-by-id (id)
   "Get specific issue by ID."
-  (rest-json-sync-call jira-rest-url (format "/api/2/issue/%s" id)))
+  (jira-call (format "/api/2/issue/%s" id)))
 
 (defun jira-issue-search (jql)
   "Execute a JQL search and return the found issues."
-  (rest-json-sync-call jira-rest-url "/api/2/search" "POST"
-		       (list :jql jql
-			     :startAt 0
-			     :maxResults 50)))
+  (jira-call "/api/2/search" "POST"
+	     :jql jql
+	     :startAt 0
+	     :maxResults 50))
 
 (provide 'jiralib-rest)
 ;;; jiralib-rest.el ends here
