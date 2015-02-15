@@ -5,6 +5,7 @@
 (require 'request)
 (require 'json)
 (require 'dash)
+(require 'org)
 
 ;;; Code:
 (defun rest-json-sync-call (base-url resource &optional method &rest data)
@@ -19,8 +20,8 @@ encoded as a alist.
 Example:
 
   (rest-json-sync-call \"http://rest.example.com\" \"/thing\"
-                       \"POST\"
-                       :name \"myThing\" :color \"blue\")
+		       \"POST\"
+		       :name \"myThing\" :color \"blue\")
 
   ⇒ (200 . (thing (id . 1) (name . \"myThing\") (color . \"blue\")))"
   (let ((request (request
@@ -75,6 +76,24 @@ Example:
 	     :jql jql
 	     :startAt 0
 	     :maxResults 50))
+
+;; ORG-JIRA
+(defconst org-jira-default-root-text
+  "You can adjust the title and text, and even the properties of this
+node (perhaps you'd like to customize the columns).  The only thing
+that is important to org-jira is the property \"ORG-JIRA-NODE\", which
+is used to track the state of this node, and find it when updates are
+needed.\n")
+
+(defun org-jira-create-org-tree ()
+  "Create a root element for JIRA querying."
+  (interactive)
+  (unless (eq major-mode 'org-mode) (org-mode))
+  (org-insert-heading-respect-content)
+  (insert "JIRA root\n")
+  (org-entry-put (point) "ORG-JIRA-NODE" "root")
+  (org-entry-put (point) "ORG-JIRA-REST-URL" "http://example.com/jira/rest")
+  (insert org-jira-default-root-text))
 
 (provide 'jiralib-rest)
 ;;; jiralib-rest.el ends here

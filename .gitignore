@@ -1,3 +1,5 @@
 *~
 /.cask/
 *.elc
+flycheck_*
+.#*
