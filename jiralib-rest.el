@@ -95,5 +95,11 @@ needed.\n")
   (org-entry-put (point) "ORG-JIRA-REST-URL" "http://example.com/jira/rest")
   (insert org-jira-default-root-text))
 
+(defun org-jira-fetch-projects ()
+  "Fetch all projects on the JIRA server for the root node in this buffer."
+  (interactive)
+  (unless (eq major-mode 'org-mode) (org-mode))
+  (error "No root node found, please call org-jira-create-org-tree first"))
+
 (provide 'jiralib-rest)
 ;;; jiralib-rest.el ends here

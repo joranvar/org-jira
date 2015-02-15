@@ -21,8 +21,8 @@
 (ert-deftest fetch-projects--in-an-empty-buffer--fails-with-message ()
   (with-temp-buffer
     (should (equal
-	     (cdr (should-error (org-jira-fetch-projects)
-				:type 'error))
+	     (nth 1 (should-error (org-jira-fetch-projects)
+				  :type 'error))
 	     "No root node found, please call org-jira-create-org-tree first"))))
 
 ;;; org-jira-test.el ends here
