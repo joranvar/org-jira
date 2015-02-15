@@ -5,6 +5,7 @@
 (require 'request)
 (require 'json)
 (require 'dash)
+(require 'org)
 
 ;;; Code:
 (defun rest-json-sync-call (base-url resource &optional method &rest data)

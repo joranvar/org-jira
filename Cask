@@ -14,3 +14,4 @@
 (depends-on "request")
 (depends-on "json")
 (depends-on "dash")
+(depends-on "org")
