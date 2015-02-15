@@ -95,11 +95,27 @@ needed.\n")
   (org-entry-put (point) "ORG-JIRA-REST-URL" "http://example.com/jira/rest")
   (insert org-jira-default-root-text))
 
+(defmacro org-jira-ensure-in-jira-node (point &rest body)
+  "Ensure POINT is in an org node with ORG-JIRA-NODE set, before executing BODY.
+
+Sets org-jira-rest-url accordingly."
+  (declare (indent defun))
+  `(save-excursion
+    (goto-char ,point)
+    (while (and (not (equal (org-entry-get (point) "ORG-JIRA-NODE") "root"))
+		(condition-case nil ((outline-up-heading 1) t) (error nil))))
+    (let ((org-jira-rest-url (org-entry-get (point) "ORG-JIRA-REST-URL")))
+      (unless org-jira-rest-url
+	(error "No root node found, please call org-jira-create-org-tree first"))
+      ,@body)))
+
 (defun org-jira-fetch-projects ()
   "Fetch all projects on the JIRA server for the root node in this buffer."
   (interactive)
   (unless (eq major-mode 'org-mode) (org-mode))
-  (error "No root node found, please call org-jira-create-org-tree first"))
+  (org-jira-ensure-in-jira-node (point)
+    (jira-set-rest-url org-jira-rest-url)
+    (jira-project-get)))
 
 (provide 'jiralib-rest)
 ;;; jiralib-rest.el ends here
