@@ -87,6 +87,7 @@ needed.\n")
 
 (defun org-jira-create-org-tree ()
   "Create a root element for JIRA querying."
+  (interactive)
   (unless (eq major-mode 'org-mode) (org-mode))
   (org-insert-heading-respect-content)
   (insert "JIRA root\n")
