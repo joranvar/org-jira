@@ -18,4 +18,11 @@
 	     (buffer-string)
 	     (concat "\n* JIRA root\n  :PROPERTIES:\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\n" org-jira-default-root-text)))))
 
+(ert-deftest fetch-projects--in-an-empty-buffer--fails-with-message ()
+  (with-temp-buffer
+    (should (equal
+	     (cdr (should-error (org-jira-fetch-projects)
+				:type 'error))
+	     "No root node found, please call org-jira-create-org-tree first"))))
+
 ;;; org-jira-test.el ends here
