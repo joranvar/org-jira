@@ -116,7 +116,17 @@ Sets org-jira-rest-url accordingly."
   (unless (eq major-mode 'org-mode) (org-mode))
   (org-jira-ensure-in-jira-node (point)
     (jira-set-rest-url org-jira-rest-url)
-    (jira-project-get)))
+    (--each (append (cdr (jira-project-get)) nil)
+      (save-excursion
+	(forward-line)
+	(org-insert-heading-respect-content)
+	(org-demote)
+	(insert (format "%s (%s)\n" (alist-get 'name it) (alist-get 'key it)))
+	(org-entry-put-multivalued-property (point) "ORG-JIRA-NODE" "project" (alist-get 'id it))
+	(org-entry-put (point) "ORG-JIRA-NAME" (alist-get 'name it))
+	(org-entry-put (point) "ORG-JIRA-KEY" (alist-get 'key it))
+	(org-entry-put (point) "ORG-JIRA-ID" (alist-get 'id it))
+	(org-entry-put (point) "ORG-JIRA-NAME" (alist-get 'name it))))))
 
 (provide 'jiralib-rest)
 ;;; jiralib-rest.el ends here
