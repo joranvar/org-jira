@@ -20,8 +20,8 @@ encoded as a alist.
 Example:
 
   (rest-json-sync-call \"http://rest.example.com\" \"/thing\"
-                       \"POST\"
-                       :name \"myThing\" :color \"blue\")
+		       \"POST\"
+		       :name \"myThing\" :color \"blue\")
 
   ⇒ (200 . (thing (id . 1) (name . \"myThing\") (color . \"blue\")))"
   (let ((request (request
