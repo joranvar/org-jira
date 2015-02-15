@@ -16,7 +16,7 @@
     (org-jira-create-org-tree)
     (should (equal
 	     (buffer-string)
-	     (concat "\n* JIRA root\n  :PROPERTIES:\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\n" org-jira-default-root-text)))))
+	     (concat "\n* JIRA root\n  :PROPERTIES:\n  :COLUMNS:  %50ITEM %8ORG-JIRA-ID(id)\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\n" org-jira-default-root-text)))))
 
 (ert-deftest fetch-projects--in-an-empty-buffer--fails-with-message ()
   (with-temp-buffer
@@ -27,7 +27,7 @@
 
 (ert-deftest fetch-projects--in-a-root-node--fetches-all-projects-on-associated-server ()
   (with-temp-buffer
-    (insert (concat "\n* JIRA root\n  :PROPERTIES:\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\n" org-jira-default-root-text))
+    (insert (concat "\n* JIRA root\n  :PROPERTIES:\n  :COLUMNS:  %50ITEM %8ORG-JIRA-ID(id)\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\n" org-jira-default-root-text))
     (using-fake-call 'rest-json-sync-call
 	((should (equal (car args) "http://example.com/jira/rest")))
       (org-jira-fetch-projects))))
