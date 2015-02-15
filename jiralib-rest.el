@@ -76,5 +76,9 @@ Example:
 	     :startAt 0
 	     :maxResults 50))
 
+;; ORG-JIRA
+(defun org-jira-create-org-tree ()
+  "Create a root element for JIRA querying.")
+
 (provide 'jiralib-rest)
 ;;; jiralib-rest.el ends here

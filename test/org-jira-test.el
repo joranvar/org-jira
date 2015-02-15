@@ -10,4 +10,12 @@
 	     (jira-session-delete))
 	   "New return")))
 
+;; create-org-tree
+(ert-deftest create-org-tree--in-an-empty-buffer--creates-root-element-for-jira-querying ()
+  (with-temp-buffer
+    (org-jira-create-org-tree)
+    (should (equal
+	     (buffer-string)
+	     ""))))
+
 ;;; org-jira-test.el ends here
