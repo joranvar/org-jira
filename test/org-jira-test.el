@@ -32,4 +32,11 @@
 	((should (equal (car args) "http://example.com/jira/rest")))
       (org-jira-fetch-projects))))
 
+(ert-deftest fetch-projects--in-a-sub-node--fetches-all-projects-on-associated-server ()
+  (with-temp-buffer
+    (insert "\n* JIRA root\n  :PROPERTIES:\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\nYou can adjust the title and text, and even the properties of this\nnode (perhaps you'd like to customize the columns).  The only thing\nthat is important to org-jira is the property \"ORG-JIRA-NODE\", which\nis used to track the state of this node, and find it when updates are\nneeded.\n\n** Thing\n")
+    (using-fake-call 'rest-json-sync-call
+	((should (equal (car args) "http://example.com/jira/rest")))
+      (org-jira-fetch-projects))))
+
 ;;; org-jira-test.el ends here

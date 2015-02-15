@@ -103,7 +103,7 @@ Sets org-jira-rest-url accordingly."
   `(save-excursion
     (goto-char ,point)
     (while (and (not (equal (org-entry-get (point) "ORG-JIRA-NODE") "root"))
-		(condition-case nil ((outline-up-heading 1) t) (error nil))))
+		(condition-case nil (outline-up-heading 1) (error nil))))
     (let ((org-jira-rest-url (org-entry-get (point) "ORG-JIRA-REST-URL")))
       (unless org-jira-rest-url
 	(error "No root node found, please call org-jira-create-org-tree first"))
