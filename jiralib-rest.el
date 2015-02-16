@@ -91,9 +91,47 @@ needed.\n")
   (unless (eq major-mode 'org-mode) (org-mode))
   (org-insert-heading-respect-content)
   (insert "JIRA root\n")
+  (org-entry-put-multivalued-property (point) "COLUMNS" "%50ITEM" "%8ORG-JIRA-ID(id)")
   (org-entry-put (point) "ORG-JIRA-NODE" "root")
   (org-entry-put (point) "ORG-JIRA-REST-URL" "http://example.com/jira/rest")
   (insert org-jira-default-root-text))
+
+(defun org-jira--get-all-nodes ()
+  "Get all the org-jira entries in the current buffer."
+  (unless (eq major-mode 'org-mode) (org-mode))
+  (org-map-entries
+   (lambda () (cons (point) (org-entry-get (point) "ORG-JIRA-NODE")))))
+
+(defun org-jira-ensure-in-jira-node (entries)
+  "Ensure POINT is in an org node.
+
+ENTRIES is the list of nodes according to `org-jira--get-all-nodes'.
+
+Returns org-jira-rest-url accordingly."
+  (let ((root-node-point (car (--first (equal (cdr it) "root") entries))))
+    (unless root-node-point
+      (error "No root node found, please call org-jira-create-org-tree first"))
+    (goto-char root-node-point)
+    (org-entry-get (point) "ORG-JIRA-REST-URL")))
+
+(defun org-jira-fetch-projects ()
+  "Fetch all projects on the JIRA server for the root node in this buffer."
+  (interactive)
+  (let ((entries (org-jira--get-all-nodes)))
+    (jira-set-rest-url (org-jira-ensure-in-jira-node entries))
+    (--each (append (cdr (jira-project-get)) nil)
+      (save-excursion
+	(forward-line)
+	(let ((org-jira-node (concat "project " (alist-get 'id it))))
+	  (unless (car (--first (equal (cdr it) org-jira-node) entries))
+	    (org-insert-heading-respect-content)
+	    (org-demote)
+	    (insert (format "%s (%s)\n" (alist-get 'name it) (alist-get 'key it)))
+	    (org-entry-put (point) "ORG-JIRA-NODE" org-jira-node)
+	    (org-entry-put (point) "ORG-JIRA-NAME" (alist-get 'name it))
+	    (org-entry-put (point) "ORG-JIRA-KEY" (alist-get 'key it))
+	    (org-entry-put (point) "ORG-JIRA-ID" (alist-get 'id it))
+	    (org-entry-put (point) "ORG-JIRA-NAME" (alist-get 'name it))))))))
 
 (provide 'jiralib-rest)
 ;;; jiralib-rest.el ends here

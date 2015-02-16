@@ -8,7 +8,7 @@
   `(let ((old-call))
     (fset old-call ,fsymbol)
     (fset ,fsymbol (lambda (&rest args) ,@new-body))
-    (let ((result ,@body))
+    (let ((result (progn ,@body)))
       (fset ,fsymbol old-call)
       result)))
 
