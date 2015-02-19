@@ -15,7 +15,7 @@
   (with-temp-buffer
     (org-jira-create-org-tree)
     (should (equal
-	     (buffer-string)
+	     (buffer-substring-no-properties (point-min) (point-max))
 	     (concat "\n* JIRA root\n  :PROPERTIES:\n  :COLUMNS:  %50ITEM %8ORG-JIRA-ID(id)\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\n" org-jira-default-root-text)))))
 
 (ert-deftest fetch-projects--in-an-empty-buffer--fails-with-message ()
@@ -70,7 +70,7 @@
 	       ))
       (org-jira-fetch-projects))
     (should (equal
-	     (buffer-string)
+	     (buffer-substring-no-properties (point-min) (point-max))
 	     "\n* JIRA root\n  :PROPERTIES:\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\nYou can adjust the title and text, and even the properties of this\nnode (perhaps you'd like to customize the columns).  The only thing\nthat is important to org-jira is the property \"ORG-JIRA-NODE\", which\nis used to track the state of this node, and find it when updates are\nneeded.\n\n** Thing\n\n** Base Components Request (BASREQ)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 12603\n   :ORG-JIRA-NAME: Base Components Request\n   :ORG-JIRA-KEY: BASREQ\n   :ORG-JIRA-ID: 12603\n   :END:\n\n** Central Development Systems (DEVSYS)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 14507\n   :ORG-JIRA-NAME: Central Development Systems\n   :ORG-JIRA-KEY: DEVSYS\n   :ORG-JIRA-ID: 14507\n   :END:\n"))))
 
 (ert-deftest fetch-projects--twice--inserts-all-projects-only-once ()
@@ -111,7 +111,7 @@
       (org-jira-fetch-projects)
       (org-jira-fetch-projects))
     (should (equal
-	     (buffer-string)
+	     (buffer-substring-no-properties (point-min) (point-max))
 	     "\n* JIRA root\n  :PROPERTIES:\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\nYou can adjust the title and text, and even the properties of this\nnode (perhaps you'd like to customize the columns).  The only thing\nthat is important to org-jira is the property \"ORG-JIRA-NODE\", which\nis used to track the state of this node, and find it when updates are\nneeded.\n\n** Thing\n\n** Base Components Request (BASREQ)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 12603\n   :ORG-JIRA-NAME: Base Components Request\n   :ORG-JIRA-KEY: BASREQ\n   :ORG-JIRA-ID: 12603\n   :END:\n\n** Central Development Systems (DEVSYS)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 14507\n   :ORG-JIRA-NAME: Central Development Systems\n   :ORG-JIRA-KEY: DEVSYS\n   :ORG-JIRA-ID: 14507\n   :END:\n"))))
 
 ;;; org-jira-test.el ends here
