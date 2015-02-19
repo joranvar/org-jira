@@ -122,16 +122,19 @@ Returns org-jira-rest-url accordingly."
     (--each (append (cdr (jira-project-get)) nil)
       (save-excursion
 	(forward-line)
-	(let ((org-jira-node (concat "project " (alist-get 'id it))))
-	  (unless (car (--first (equal (cdr it) org-jira-node) entries))
-	    (org-insert-heading-respect-content)
+	(let* ((org-jira-node (concat "project " (alist-get 'id it)))
+               (org-jira-point (car (--first (equal (cdr it) org-jira-node) entries))))
+          (unless (and org-jira-point
+                       (goto-char org-jira-point))
+            (org-insert-heading-respect-content)
 	    (org-demote)
-	    (insert (format "%s (%s)\n" (alist-get 'name it) (alist-get 'key it)))
-	    (org-entry-put (point) "ORG-JIRA-NODE" org-jira-node)
-	    (org-entry-put (point) "ORG-JIRA-NAME" (alist-get 'name it))
-	    (org-entry-put (point) "ORG-JIRA-KEY" (alist-get 'key it))
-	    (org-entry-put (point) "ORG-JIRA-ID" (alist-get 'id it))
-	    (org-entry-put (point) "ORG-JIRA-NAME" (alist-get 'name it))))))))
+            (insert (format "%s (%s)\n" (alist-get 'name it) (alist-get 'key it)))
+            (org-entry-put (point) "ORG-JIRA-NODE" org-jira-node))
+          (org-entry-put (point) "ORG-JIRA-NAME" (alist-get 'name it))
+          (org-entry-put (point) "ORG-JIRA-KEY" (alist-get 'key it))
+          (org-entry-put (point) "ORG-JIRA-ID" (alist-get 'id it))
+          (org-entry-put (point) "ORG-JIRA-NAME" (alist-get 'name it))
+          (setq entries (org-jira--get-all-nodes)))))))
 
 (provide 'jiralib-rest)
 ;;; jiralib-rest.el ends here
