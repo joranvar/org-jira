@@ -20,19 +20,19 @@ encoded as a alist.
 Example:
 
   (rest-json-sync-call \"http://rest.example.com\" \"/thing\"
-		       \"POST\"
-		       :name \"myThing\" :color \"blue\")
+                       \"POST\"
+                       :name \"myThing\" :color \"blue\")
 
   ⇒ (200 . (thing (id . 1) (name . \"myThing\") (color . \"blue\")))"
   (let ((request (request
-		  (concat base-url resource)
-		  :type (or method "GET")
-		  :data (and data (json-encode data))
-		  :headers (and data '(("Content-Type" . "application/json")))
-		  :parser (lambda () (let ((json-object-type 'alist)) (json-read)))
-		  :sync t)))
+                  (concat base-url resource)
+                  :type (or method "GET")
+                  :data (and data (json-encode data))
+                  :headers (and data '(("Content-Type" . "application/json")))
+                  :parser (lambda () (let ((json-object-type 'alist)) (json-read)))
+                  :sync t)))
     (cons (request-response-status-code request)
-	  (request-response-data request))))
+          (request-response-data request))))
 
 ;; Partial function pointer
 (declare-function
@@ -47,8 +47,8 @@ Example:
 (defun jira-session-create (username password)
   "Create a session for user USERNAME, identified by PASSWORD."
   (jira-call "/auth/1/session" "POST"
-	     :username username
-	     :password password))
+             :username username
+             :password password))
 
 (defun jira-session-delete ()
   "Destroy the current session, aka logout."
@@ -73,9 +73,9 @@ Example:
 (defun jira-issue-search (jql)
   "Execute a JQL search and return the found issues."
   (jira-call "/api/2/search" "POST"
-	     :jql jql
-	     :startAt 0
-	     :maxResults 50))
+             :jql jql
+             :startAt 0
+             :maxResults 50))
 
 ;; ORG-JIRA
 (defconst org-jira-default-root-text
@@ -121,13 +121,13 @@ Returns org-jira-rest-url accordingly."
     (jira-set-rest-url (org-jira-ensure-in-jira-node entries))
     (--each (append (cdr (jira-project-get)) nil)
       (save-excursion
-	(forward-line)
-	(let* ((org-jira-node (concat "project " (alist-get 'id it)))
+        (forward-line)
+        (let* ((org-jira-node (concat "project " (alist-get 'id it)))
                (org-jira-point (car (--first (equal (cdr it) org-jira-node) entries))))
           (unless (and org-jira-point
                        (goto-char org-jira-point))
             (org-insert-heading-respect-content)
-	    (org-demote)
+            (org-demote)
             (insert (format "%s (%s)\n" (alist-get 'name it) (alist-get 'key it)))
             (org-entry-put (point) "ORG-JIRA-NODE" org-jira-node))
           (org-entry-put (point) "ORG-JIRA-NAME" (alist-get 'name it))

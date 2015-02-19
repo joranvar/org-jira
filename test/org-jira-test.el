@@ -5,32 +5,32 @@
 (ert-deftest using-fake-environment-works-fine ()
   "Exploratory test to make sure that real REST calls are not made."
   (should (equal
-	   (using-fake-call 'jira-call
-	       ("New return")
-	     (jira-session-delete))
-	   "New return")))
+           (using-fake-call 'jira-call
+               ("New return")
+             (jira-session-delete))
+           "New return")))
 
 ;; create-org-tree
 (ert-deftest create-org-tree--in-an-empty-buffer--creates-root-element-for-jira-querying ()
   (with-temp-buffer
     (org-jira-create-org-tree)
     (should (equal
-	     (buffer-substring-no-properties (point-min) (point-max))
-	     (concat "\n* JIRA root\n  :PROPERTIES:\n  :COLUMNS:  %50ITEM %8ORG-JIRA-ID(id)\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\n" org-jira-default-root-text)))))
+             (buffer-substring-no-properties (point-min) (point-max))
+             (concat "\n* JIRA root\n  :PROPERTIES:\n  :COLUMNS:  %50ITEM %8ORG-JIRA-ID(id)\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\n" org-jira-default-root-text)))))
 
 (ert-deftest fetch-projects--in-an-empty-buffer--fails-with-message ()
   (with-temp-buffer
     (should (equal
-	     (nth 1 (should-error (org-jira-fetch-projects)
-				  :type 'error))
-	     "No root node found, please call org-jira-create-org-tree first"))))
+             (nth 1 (should-error (org-jira-fetch-projects)
+                                  :type 'error))
+             "No root node found, please call org-jira-create-org-tree first"))))
 
 (ert-deftest fetch-projects--in-a-root-node--fetches-all-projects-on-associated-server ()
   (with-temp-buffer
     (insert (concat "\n* JIRA root\n  :PROPERTIES:\n  :COLUMNS:  %50ITEM %8ORG-JIRA-ID(id)\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\n" org-jira-default-root-text))
     (using-fake-call 'rest-json-sync-call
-	((should (equal (car args) "http://example.com/jira/rest"))
-	 nil)
+        ((should (equal (car args) "http://example.com/jira/rest"))
+         nil)
       (org-jira-fetch-projects))))
 
 (defconst first-fake-return-of-fetch-projects
@@ -104,8 +104,8 @@
         (first-fake-return-of-fetch-projects)
       (org-jira-fetch-projects))
     (should (equal
-	     (buffer-substring-no-properties (point-min) (point-max))
-	     "\n* JIRA root\n  :PROPERTIES:\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\nYou can adjust the title and text, and even the properties of this\nnode (perhaps you'd like to customize the columns).  The only thing\nthat is important to org-jira is the property \"ORG-JIRA-NODE\", which\nis used to track the state of this node, and find it when updates are\nneeded.\n\n** Thing\n\n** Base Components Request (BASREQ)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 12603\n   :ORG-JIRA-NAME: Base Components Request\n   :ORG-JIRA-KEY: BASREQ\n   :ORG-JIRA-ID: 12603\n   :END:\n\n** Central Development Systems (DEVSYS)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 14507\n   :ORG-JIRA-NAME: Central Development Systems\n   :ORG-JIRA-KEY: DEVSYS\n   :ORG-JIRA-ID: 14507\n   :END:\n"))))
+             (buffer-substring-no-properties (point-min) (point-max))
+             "\n* JIRA root\n  :PROPERTIES:\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\nYou can adjust the title and text, and even the properties of this\nnode (perhaps you'd like to customize the columns).  The only thing\nthat is important to org-jira is the property \"ORG-JIRA-NODE\", which\nis used to track the state of this node, and find it when updates are\nneeded.\n\n** Thing\n\n** Base Components Request (BASREQ)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 12603\n   :ORG-JIRA-NAME: Base Components Request\n   :ORG-JIRA-KEY: BASREQ\n   :ORG-JIRA-ID: 12603\n   :END:\n\n** Central Development Systems (DEVSYS)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 14507\n   :ORG-JIRA-NAME: Central Development Systems\n   :ORG-JIRA-KEY: DEVSYS\n   :ORG-JIRA-ID: 14507\n   :END:\n"))))
 
 (ert-deftest fetch-projects--twice--inserts-all-projects-only-once ()
   (with-temp-buffer
@@ -115,8 +115,8 @@
       (org-jira-fetch-projects)
       (org-jira-fetch-projects))
     (should (equal
-	     (buffer-substring-no-properties (point-min) (point-max))
-	     "\n* JIRA root\n  :PROPERTIES:\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\nYou can adjust the title and text, and even the properties of this\nnode (perhaps you'd like to customize the columns).  The only thing\nthat is important to org-jira is the property \"ORG-JIRA-NODE\", which\nis used to track the state of this node, and find it when updates are\nneeded.\n\n** Thing\n\n** Base Components Request (BASREQ)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 12603\n   :ORG-JIRA-NAME: Base Components Request\n   :ORG-JIRA-KEY: BASREQ\n   :ORG-JIRA-ID: 12603\n   :END:\n\n** Central Development Systems (DEVSYS)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 14507\n   :ORG-JIRA-NAME: Central Development Systems\n   :ORG-JIRA-KEY: DEVSYS\n   :ORG-JIRA-ID: 14507\n   :END:\n"))))
+             (buffer-substring-no-properties (point-min) (point-max))
+             "\n* JIRA root\n  :PROPERTIES:\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\nYou can adjust the title and text, and even the properties of this\nnode (perhaps you'd like to customize the columns).  The only thing\nthat is important to org-jira is the property \"ORG-JIRA-NODE\", which\nis used to track the state of this node, and find it when updates are\nneeded.\n\n** Thing\n\n** Base Components Request (BASREQ)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 12603\n   :ORG-JIRA-NAME: Base Components Request\n   :ORG-JIRA-KEY: BASREQ\n   :ORG-JIRA-ID: 12603\n   :END:\n\n** Central Development Systems (DEVSYS)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 14507\n   :ORG-JIRA-NAME: Central Development Systems\n   :ORG-JIRA-KEY: DEVSYS\n   :ORG-JIRA-ID: 14507\n   :END:\n"))))
 
 (ert-deftest fetch-projects--twice--updates-all-changed-projects ()
   (with-temp-buffer
@@ -128,7 +128,7 @@
         (second-fake-return-of-fetch-projects)
       (org-jira-fetch-projects))
     (should (equal
-	     (buffer-substring-no-properties (point-min) (point-max))
-	     "\n* JIRA root\n  :PROPERTIES:\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\nYou can adjust the title and text, and even the properties of this\nnode (perhaps you'd like to customize the columns).  The only thing\nthat is important to org-jira is the property \"ORG-JIRA-NODE\", which\nis used to track the state of this node, and find it when updates are\nneeded.\n\n** Thing\n\n** Base Components Request (BASREQ)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 12603\n   :ORG-JIRA-NAME: Base Components Request Changed Name\n   :ORG-JIRA-KEY: BASREQ\n   :ORG-JIRA-ID: 12603\n   :END:\n\n** Central Development Systems (DEVSYS)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 14507\n   :ORG-JIRA-NAME: Central Development Systems\n   :ORG-JIRA-KEY: DEVSYS\n   :ORG-JIRA-ID: 14507\n   :END:\n"))))
+             (buffer-substring-no-properties (point-min) (point-max))
+             "\n* JIRA root\n  :PROPERTIES:\n  :ORG-JIRA-NODE: root\n  :ORG-JIRA-REST-URL: http://example.com/jira/rest\n  :END:\nYou can adjust the title and text, and even the properties of this\nnode (perhaps you'd like to customize the columns).  The only thing\nthat is important to org-jira is the property \"ORG-JIRA-NODE\", which\nis used to track the state of this node, and find it when updates are\nneeded.\n\n** Thing\n\n** Base Components Request (BASREQ)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 12603\n   :ORG-JIRA-NAME: Base Components Request Changed Name\n   :ORG-JIRA-KEY: BASREQ\n   :ORG-JIRA-ID: 12603\n   :END:\n\n** Central Development Systems (DEVSYS)\n   :PROPERTIES:\n   :ORG-JIRA-NODE: project 14507\n   :ORG-JIRA-NAME: Central Development Systems\n   :ORG-JIRA-KEY: DEVSYS\n   :ORG-JIRA-ID: 14507\n   :END:\n"))))
 
 ;;; org-jira-test.el ends here
