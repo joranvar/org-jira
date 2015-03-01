@@ -62,6 +62,10 @@ Example:
   "Get specific project by ID."
   (jira-call (format "/api/2/project/%s" id)))
 
+(defun jira-component-get-by-project (project-id)
+  "Get specific component by PROJECT-ID."
+  (jira-call (format "/api/2/project/%s/components" project-id)))
+
 (defun jira-component-get-by-id (id)
   "Get specific component by ID."
   (jira-call (format "/api/2/component/%s" id)))
@@ -135,6 +139,60 @@ Returns org-jira-rest-url accordingly."
           (org-entry-put (point) "ORG-JIRA-ID" (alist-get 'id it))
           (org-entry-put (point) "ORG-JIRA-NAME" (alist-get 'name it))
           (setq entries (org-jira--get-all-nodes)))))))
+
+(defun org-jira-fetch-components ()
+  "Fetch all components on the JIRA server for the project node at point."
+  (interactive)
+  (let ((entries (org-jira--get-all-nodes))
+        (project-node-point (point)))
+    (save-excursion
+      (jira-set-rest-url (org-jira-ensure-in-jira-node entries)))
+    (let* ((org-project-node (car (--last (and (s-starts-with? "project " (cdr it)) (>= project-node-point (car it))) entries)))
+           (org-project-id (org-entry-get org-project-node "ORG-JIRA-ID")))
+      (--each (append (cdr (jira-component-get-by-project org-project-id)) nil)
+        (save-excursion
+          (forward-line)
+          (let* ((org-jira-node (concat "component " (alist-get 'id it)))
+                 (org-jira-point (car (--first (equal (cdr it) org-jira-node) entries))))
+            (unless (and org-jira-point
+                         (goto-char org-jira-point))
+              (org-insert-heading-respect-content)
+              (org-demote)
+              (insert (format "%s :%s:\n" (alist-get 'name it) (s-replace "-" "_" (alist-get 'id it))))
+              (org-entry-put (point) "ORG-JIRA-NODE" org-jira-node))
+            (org-entry-put (point) "ORG-JIRA-NAME" (alist-get 'name it))
+            (org-entry-put (point) "ORG-JIRA-ID" (alist-get 'id it))
+            (org-entry-put (point) "ORG-JIRA-DESCRIPTION" (alist-get 'description it))
+            (setq entries (org-jira--get-all-nodes))))))))
+
+(defun org-jira-fetch-epics ()
+  "Fetch all epics on the JIRA server for the component node at point."
+  (interactive)
+  (let ((entries (org-jira--get-all-nodes))
+        (component-node-point (point)))
+    (save-excursion
+      (jira-set-rest-url (org-jira-ensure-in-jira-node entries)))
+    (let* ((org-project-node (car (--last (and (s-starts-with? "project " (cdr it)) (>= component-node-point (car it))) entries)))
+           (org-project-id (org-entry-get org-project-node "ORG-JIRA-ID"))
+           (org-component-node (car (--last (>= component-node-point (car it)) entries)))
+           (org-component-id (org-entry-get org-component-node "ORG-JIRA-ID")))
+      (--each (--map
+               (cdr (jira-issue-get-by-id (alist-get 'id it)))
+               (append (alist-get 'issues (cdr (jira-issue-search (s-lex-format "project = \"${org-project-id}\" AND issuetype = epic AND component = \"${org-component-id}\" ")))) nil))
+        (save-excursion
+          (forward-line)
+          (let* ((org-jira-node (concat "epic " (alist-get 'id it)))
+                 (org-jira-point (car (--first (equal (cdr it) org-jira-node) entries))))
+            (unless (and org-jira-point
+                         (goto-char org-jira-point))
+              (org-insert-heading-respect-content)
+              (org-demote)
+              (insert (format "%s :%s:\n" (alist-get 'summary (alist-get 'fields it)) (s-replace "-" "_" (alist-get 'key it))))
+              (org-entry-put (point) "ORG-JIRA-NODE" org-jira-node))
+            (org-entry-put (point) "ORG-JIRA-KEY" (alist-get 'key it))
+            (org-entry-put (point) "ORG-JIRA-ID" (alist-get 'id it))
+            (org-entry-put (point) "ORG-JIRA-DESCRIPTION" (alist-get 'description (alist-get 'fields it)))
+            (setq entries (org-jira--get-all-nodes))))))))
 
 (provide 'jiralib-rest)
 ;;; jiralib-rest.el ends here
